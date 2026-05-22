@@ -5,6 +5,18 @@ class ReservationService:
     def __init__(self, session):
         self.session = session
 
+    def view_movies(self):
+
+        query = """
+        SELECT DISTINCT movie_id FROM seats;
+        """
+
+        rows = self.session.execute(query)
+
+        movies = [row.movie_id for row in rows]
+
+        return movies
+
     def reserve_seat(self, movie_id, seat_id, user):
 
         query = """
@@ -28,7 +40,7 @@ class ReservationService:
             print(f"[SUCCESS] {user} reserved {seat_id}")
             return True
         else:
-            print(f"[FAILED] {seat_id} already reserved")
+            print(f"[FAILED] {seat_id} could not be reserved")
             return False
 
     def view_reservations(self, movie_id):
@@ -66,19 +78,19 @@ class ReservationService:
             print("[FAILED UPDATE]")
 
 def initialize_seats(session):
+    for movie_id in ["MOV1", "MOV2", "MOV3"]:
+        for row_letter in ["A", "B", "C", "D"]:
+            for num in range(1, 11):
 
-    for row_letter in ["A", "B", "C", "D"]:
-        for num in range(1, 11):
+                seat_id = f"{row_letter}{num}"
 
-            seat_id = f"{row_letter}{num}"
-
-            session.execute("""
-            INSERT INTO seats (
-                movie_id,
-                seat_id,
-                reserved,
-                reserved_by
-            )
-            VALUES (%s, %s, false, null)
-            IF NOT EXISTS
-            """, ("MOV1", seat_id))
+                session.execute("""
+                INSERT INTO seats (
+                    movie_id,
+                    seat_id,
+                    reserved,
+                    reserved_by
+                )
+                VALUES (%s, %s, false, null)
+                IF NOT EXISTS
+                """, (movie_id, seat_id))
