@@ -35,11 +35,16 @@ while True:
             user = input("User: ")
             seat = input("Seat: ")
 
-            service.reserve_seat(
+            result = service.reserve_seat(
                 movie_id,
                 seat,
                 user
             )
+
+            if result:
+                print(f"[SUCCESS] {user} reserved {seat}")
+            else:
+                print(f"[FAILED] {seat} could not be reserved")
 
         elif choice == "2":
 
@@ -47,19 +52,22 @@ while True:
             new_user = input("New user: ")
             seat = input("Seat: ")
 
-            service.update_reservation(
+            result = service.update_reservation(
                 movie_id,
                 seat,
                 old_user,
                 new_user
             )
 
+            if result:
+                print("[UPDATED]")
+            else:
+                print("[FAILED UPDATE]")
         elif choice == "3":
 
-            service.view_reservations(movie_id)
-
-        # elif choice == "4":
-        #     service.view_movies()
+            reservations = service.get_reservations(movie_id)
+            for row in reservations:
+                print(row)
 
         elif choice == "4":
             break

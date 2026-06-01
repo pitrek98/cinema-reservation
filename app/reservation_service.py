@@ -1,5 +1,8 @@
 from datetime import datetime
 
+from cassandra import ConsistencyLevel
+from cassandra.query import SimpleStatement
+
 class ReservationService:
 
     def __init__(self, session):
@@ -19,63 +22,67 @@ class ReservationService:
 
     def reserve_seat(self, movie_id, seat_id, user):
 
-        query = """
-        UPDATE seats
-        SET reserved = true,
-            reserved_by = %s,
-            reservation_time = %s
-        WHERE movie_id = %s
-          AND seat_id = %s
-        IF reserved = false;
-        """
+        try:
+            query = self.session.prepare("""
+            UPDATE seats
+            SET reserved = true,
+                reserved_by = ?,
+                reservation_time = ?
+            WHERE movie_id = ?
+            AND seat_id = ?
+            IF reserved = false;
+            """)
 
-        result = self.session.execute(
-            query,
-            (user, datetime.now(), movie_id, seat_id)
-        )
+            query.consistency_level = ConsistencyLevel.QUORUM
 
-        row = result.one()
+            result = self.session.execute(
+                query,
+                (user, datetime.now(), movie_id, seat_id)
+            )
 
-        if row.applied:
-            print(f"[SUCCESS] {user} reserved {seat_id}")
-            return True
-        else:
-            print(f"[FAILED] {seat_id} could not be reserved")
+            row = result.one()
+
+            return row.applied
+        except Exception as e:
+            print(f"[ERROR] {e}")
             return False
 
-    def view_reservations(self, movie_id):
 
-        query = """
-        SELECT * FROM seats
-        WHERE movie_id = %s;
-        """
 
-        rows = self.session.execute(query, (movie_id,))
+    def get_reservations(self, movie_id):
+        try:
+            query = """
+            SELECT * FROM seats
+            WHERE movie_id = %s;
+            """
 
-        for row in rows:
-            print(row)
+            rows = self.session.execute(query, (movie_id,))
+
+            return rows
+        except Exception as e:
+            print(f"[ERROR] {e}")
+            return []
 
     def update_reservation(self, movie_id, seat_id, old_user, new_user):
+        try:
+            query = """
+            UPDATE seats
+            SET reserved_by = %s
+            WHERE movie_id = %s
+            AND seat_id = %s
+            IF reserved_by = %s;
+            """
 
-        query = """
-        UPDATE seats
-        SET reserved_by = %s
-        WHERE movie_id = %s
-          AND seat_id = %s
-        IF reserved_by = %s;
-        """
+            result = self.session.execute(
+                query,
+                (new_user, movie_id, seat_id, old_user)
+            )
 
-        result = self.session.execute(
-            query,
-            (new_user, movie_id, seat_id, old_user)
-        )
-
-        row = result.one()
-
-        if row.applied:
-            print("[UPDATED]")
-        else:
-            print("[FAILED UPDATE]")
+            row = result.one()
+            return row.applied
+        except Exception as e:
+            print(f"[ERROR] {e}")
+            return False
 
 def initialize_seats(session):
     for movie_id in ["MOV1", "MOV2", "MOV3"]:
