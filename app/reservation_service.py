@@ -34,6 +34,7 @@ class ReservationService:
             """)
 
             query.consistency_level = ConsistencyLevel.QUORUM
+            query.serial_consistency_level = ConsistencyLevel.SERIAL
 
             result = self.session.execute(
                 query,
