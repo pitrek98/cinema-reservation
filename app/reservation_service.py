@@ -8,7 +8,7 @@ class ReservationService:
     def __init__(self, session):
         self.session = session
 
-    def view_movies(self):
+    def get_movies(self):
 
         query = """
         SELECT DISTINCT movie_id FROM seats;

@@ -12,7 +12,7 @@ while True:
 
     print("Avaliable movies:")
 
-    movies = service.view_movies() + ["Exit"]
+    movies = service.get_movies() + ["Exit"]
     for i, movie in enumerate(movies, start=1):
         print(i, ". ", movie, sep="")
     
