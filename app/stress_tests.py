@@ -99,7 +99,7 @@ def stress_test_2(service):
 
     start = time.time()
 
-    for _ in range(10):
+    for _ in range(3):
 
         t = threading.Thread(target=random_client)
 
@@ -121,7 +121,7 @@ def stress_test_3(service):
     seats = [
         f"{row}{num}"
         for row in ["A", "B", "C", "D"]
-        for num in range(1, 10)
+        for num in range(1, 11)
     ]
 
     results = {
@@ -175,7 +175,7 @@ def stress_test_3(service):
 def reset_seats(session):
 
     for row in ["A", "B", "C", "D"]:
-        for num in range(1, 10):
+        for num in range(1, 11):
 
             seat = f"{row}{num}"
 

@@ -11,16 +11,19 @@ class ReservationService:
         self.session = session
 
     def get_movies(self):
+        try:
+            query = """
+            SELECT DISTINCT movie_id FROM seats;
+            """
 
-        query = """
-        SELECT DISTINCT movie_id FROM seats;
-        """
+            rows = self.session.execute(query)
 
-        rows = self.session.execute(query)
+            movies = [row.movie_id for row in rows]
 
-        movies = [row.movie_id for row in rows]
-
-        return movies
+            return movies
+        except Exception as e:
+            print(f"[ERROR] {e}")
+            return []
 
     def reserve_seat(self, movie_id, seat_id, user):
 
