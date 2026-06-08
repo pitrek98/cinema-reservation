@@ -14,7 +14,15 @@ After cassandra starts
 docker exec -i cassandra1 cqlsh < app/schema.cql #On Linux
 Get-Content app/schema.cql | docker exec -i cassandra1 cqlsh #On Windows
 ```
-To access CLI
+To access Command Line Interface
 ```bash
 python app/main.py
+```
+To access Graphical User Interface
+```bash
+python app/gui.py
+```
+To run stress tests
+```bash
+python app/test.py
 ```
