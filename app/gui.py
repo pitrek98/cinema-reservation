@@ -122,8 +122,7 @@ def cancel():
     if not movie or not user or not selected_seats:
         messagebox.showwarning("Błąd", "Wybierz film, podaj imię i zaznacz miejsca.")
         return
-    for seat in list(selected_seats):
-        service.cancel_reservation(movie, seat, user)
+    service.cancel_multiple_reservations(movie, selected_seats, user)
     messagebox.showinfo("OK", f"Anulowano: {', '.join(sorted(selected_seats))}")
     cancel_mode = False
     cancel_mode_btn.config(text="Tryb anulowania", bg="orange")

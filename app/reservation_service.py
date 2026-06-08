@@ -2,6 +2,8 @@ from datetime import datetime
 
 from cassandra import ConsistencyLevel
 from cassandra.query import SimpleStatement
+from cassandra.query import BatchStatement
+from cassandra.query import BatchType
 
 class ReservationService:
 
@@ -81,6 +83,51 @@ class ReservationService:
 
             row = result.one()
             return row.applied
+        except Exception as e:
+            print(f"[ERROR] {e}")
+            return False
+        
+    def cancel_reservation(self, movie_id, seat_id, user):
+        try:
+            query = """
+            UPDATE seats
+            SET reserved = false,
+                reserved_by = null,
+                reservation_time = null
+            WHERE movie_id = %s
+            AND seat_id = %s
+            IF reserved_by = %s;
+            """
+
+            result = self.session.execute(
+                query,
+                (movie_id, seat_id, user)
+            )
+
+            row = result.one()
+            return row.applied
+        except Exception as e:
+            print(f"[ERROR] {e}")
+            return False
+        
+    def cancel_multiple_reservations(self, movie_id, seat_ids, user):
+        try:
+            batch = BatchStatement()
+            for seat_id in seat_ids:
+                query = """
+                UPDATE seats
+                SET reserved = false,
+                    reserved_by = null,
+                    reservation_time = null
+                WHERE movie_id = %s
+                AND seat_id = %s
+                IF reserved_by = %s;
+                """
+                batch.add(SimpleStatement(query), (movie_id, seat_id, user))
+
+            result = self.session.execute(batch)
+
+            return all(row.applied for row in result)
         except Exception as e:
             print(f"[ERROR] {e}")
             return False

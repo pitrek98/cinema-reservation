@@ -26,7 +26,8 @@ while True:
         print("\n1. Reserve")
         print("2. Update reservation")
         print("3. View reservations")
-        print("4. Back to movie selection")
+        print("4. Cancel reservation")
+        print("5. Back to movie selection")
 
         choice = input("> ")
 
@@ -70,4 +71,18 @@ while True:
                 print(row)
 
         elif choice == "4":
+            user = input("User: ")
+            seat = input("Seat: ")
+
+            result = service.cancel_reservation(
+                movie_id,
+                seat,
+                user
+            )
+
+            if result:
+                print("[CANCELLED]")
+            else:
+                print("[FAILED CANCELLATION]")
+        elif choice == "5":
             break
